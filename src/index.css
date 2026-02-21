@@ -283,3 +283,223 @@ body,
   text-align: center;
 }
 
+/* ── App Navigation ── */
+.app-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  display: flex;
+  gap: 12px;
+  z-index: 10000;
+  border-bottom: 1px solid #334155;
+}
+
+.app-nav button {
+  padding: 10px 20px;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.app-nav button:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: #38bdf8;
+  color: #e2e8f0;
+}
+
+.app-nav button.nav-active {
+  background: #38bdf8;
+  color: white;
+  border-color: #38bdf8;
+}
+
+/* Wrapper histórico ocupa toda tela */
+.historical-wrapper {
+  width: 100%;
+  height: calc(100vh - 60px); /* subtrai altura da nav */
+  padding-top: 60px;
+  overflow-y: auto;
+}
+
+/* Ajusta live view para nav fixa */
+.app-container {
+  margin-top: 60px; /* altura da nav */
+  height: calc(100vh - 60px);
+}
+
+/* ── Historical Data (mesmo tema da Live) ── */
+.historical-container {
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+  background: #0f172a;
+}
+
+.historical-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #334155;
+}
+
+.historical-header h1 {
+  font-size: 1.4rem; /* menor */
+  font-weight: 700;
+  color: #38bdf8;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-select,
+.date-input {
+  padding: 8px 12px; /* menor */
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  font-size: 0.9rem; /* menor */
+  min-width: 140px;
+}
+
+.date-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.date-separator {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.apply-btn {
+  padding: 8px 16px; /* menor */
+  background: #38bdf8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.apply-btn:hover:not(:disabled) {
+  background: #0ea5e9;
+}
+
+.apply-btn:disabled {
+  background: #475569;
+  cursor: not-allowed;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* menor */
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: #1e293b;
+  padding: 16px; /* menor */
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #334155;
+}
+
+.stat-big {
+  font-size: 1.8rem; /* menor que 2.8rem */
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 4px;
+}
+
+.stat-card div:last-child {
+  color: #94a3b8;
+  font-size: 0.75rem; /* menor */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-panel {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+}
+
+.chart-panel h3 {
+  color: #e2e8f0;
+  margin-bottom: 16px;
+  font-size: 1rem; /* menor */
+  font-weight: 600;
+}
+
+.no-data,
+.no-selection {
+  text-align: center;
+  padding: 80px 20px;
+  color: #94a3b8;
+}
+
+.no-data h3,
+.no-selection h3 {
+  color: #e2e8f0;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.error-banner {
+  padding: 12px 20px;
+  background: #7f1d1d;
+  color: #fca5a5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+/* Responsivo */
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-select,
+  .date-input,
+  .apply-btn {
+    flex: 1;
+  }
+}

@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useCallback, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  useState,
+} from "react";
 import {
   MapContainer,
   TileLayer,
@@ -114,7 +120,7 @@ export default function TrackingMap({ trackings, selectedId, onMarkerClick }) {
         onMarkerClick(null);
       }
     },
-    [onMarkerClick]
+    [onMarkerClick],
   );
 
   useEffect(() => {
@@ -164,7 +170,7 @@ export default function TrackingMap({ trackings, selectedId, onMarkerClick }) {
   // Tracking atual selecionado
   const selectedTracking = useMemo(
     () => trackings.find((t) => t.id === selectedId) || null,
-    [trackings, selectedId]
+    [trackings, selectedId],
   );
 
   // Trilha real (tracking points) do voo selecionado
@@ -175,7 +181,7 @@ export default function TrackingMap({ trackings, selectedId, onMarkerClick }) {
 
     const flightId = selectedTracking.flight_instance.id;
     const sameFlightPoints = trackings.filter(
-      (t) => t.flight_instance.id === flightId
+      (t) => t.flight_instance.id === flightId,
     );
 
     if (sameFlightPoints.length === 0) {
@@ -186,8 +192,7 @@ export default function TrackingMap({ trackings, selectedId, onMarkerClick }) {
       .slice()
       .sort(
         (a, b) =>
-          new Date(a.started_at).getTime() -
-          new Date(b.started_at).getTime()
+          new Date(a.started_at).getTime() - new Date(b.started_at).getTime(),
       );
 
     const positions = ordered.map((p) => [p.latitude, p.longitude]);
@@ -212,12 +217,14 @@ export default function TrackingMap({ trackings, selectedId, onMarkerClick }) {
     if (!selectedTracking) return null;
 
     const fi = selectedTracking.flight_instance;
-    const dep = fi.departure_vertiport?.latitude && fi.departure_vertiport?.longitude
-      ? [[fi.departure_vertiport.latitude, fi.departure_vertiport.longitude]]
-      : null;
-    const arr = fi.arrival_vertiport?.latitude && fi.arrival_vertiport?.longitude
-      ? [[fi.arrival_vertiport.latitude, fi.arrival_vertiport.longitude]]
-      : null;
+    const dep =
+      fi.departure_vertiport?.latitude && fi.departure_vertiport?.longitude
+        ? [[fi.departure_vertiport.latitude, fi.departure_vertiport.longitude]]
+        : null;
+    const arr =
+      fi.arrival_vertiport?.latitude && fi.arrival_vertiport?.longitude
+        ? [[fi.arrival_vertiport.latitude, fi.arrival_vertiport.longitude]]
+        : null;
 
     return dep && arr ? [dep[0], arr[0]] : null;
   }, [selectedTracking]);
@@ -311,19 +318,19 @@ export default function TrackingMap({ trackings, selectedId, onMarkerClick }) {
 
       {/* Linha direta tracejada se tem vertiports mas sem route */}
       {selectedTracking &&
-  !selectedTracking.flight_instance.route &&
-  directRoute &&
-  directRoute.length === 2 && (
-    <Polyline
-      positions={directRoute}
-      pathOptions={{
-        color: "#9ca3af", // cinza claro
-        weight: 2,
-        opacity: 0.5,
-        dashArray: "15, 10", // tracejado
-      }}
-    />
-  )}
+        !selectedTracking.flight_instance.route &&
+        directRoute &&
+        directRoute.length === 2 && (
+          <Polyline
+            positions={directRoute}
+            pathOptions={{
+              color: "#9ca3af", // cinza claro
+              weight: 2,
+              opacity: 0.5,
+              dashArray: "15, 10", // tracejado
+            }}
+          />
+        )}
 
       {/* Marcadores das aeronaves */}
       {trackings.map((t) => {

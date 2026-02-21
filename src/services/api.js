@@ -22,3 +22,9 @@ export async function fetchWaypoints(routeId) {
   const response = await api.get("/waypoints", { params: { route: routeId } });
   return response.data;
 }
+
+
+export async function fetchAircraftData(filters = {}) {
+  const response = await api.get("/aircraft_data", { params: filters });
+  return response.data;
+}
