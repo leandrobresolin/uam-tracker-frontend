@@ -176,6 +176,8 @@ export default function HistoricalData() {
       if (points.length > 1) {
         const first = points[0];
         const last = points[points.length - 1];
+        flight.startEnergy=first.energy_level;
+        flight.endEnergy=last.energy_level;
         flight.energyDelta = Math.round(first.energy_level - last.energy_level);
         const startDate = new Date(first.created_at);
         const endDate = new Date(last.created_at);
@@ -303,7 +305,9 @@ export default function HistoricalData() {
                       <th>Callsign</th>
                       <th>Rota</th>
                       <th>Duração</th>
-                      <th>Energia Δ</th>
+                      <th>Energia Inicial</th>
+                      <th>Energia Final</th>
+                      <th>Energia Consumida</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -316,6 +320,8 @@ export default function HistoricalData() {
                         <td>{flight.callsign}</td>
                         <td>{flight.route}</td>
                         <td>{flight.duration}</td>
+                        <td>{flight.startEnergy}</td>
+                        <td>{flight.endEnergy}</td>
                         <td
                           className={`energy-cell ${flight.energyDelta > 50 ? "high-consumption" : ""}`}
                         >
