@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback} from "react";
 import {
   LineChart,
   Line,
@@ -37,13 +37,14 @@ export default function HistoricalData() {
       const response = await fetchAircraftData();
       setAllData(response);
     } catch (err) {
+      console.error("Erro dados base:", err);
       setError("Falha ao carregar dados base");
     } finally {
       setLoading(false);
     }
   };
 
-  const applyFilters = async () => {
+  const applyFilters = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -65,12 +66,17 @@ export default function HistoricalData() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedAircraft, startDate, endDate]);
 
   const aircraftOptions = useMemo(() => {
-    return [
-      ...new Set(allData.map((d) => d.flight_instance.aircraft.tail_number)),
-    ];
+    if (!allData.length) return [];
+    return Array.from(
+      new Set(
+        allData
+          .map((d) => d.flight_instance.aircraft?.tail_number)
+          .filter(Boolean),
+      ),
+    ).sort();
   }, [allData]);
 
   const chartData = useMemo(() => {
@@ -139,6 +145,55 @@ export default function HistoricalData() {
     };
   }, [filteredData]);
 
+  const flightsGrouped = useMemo(() => {
+    if (!filteredData?.length) return [];
+
+    const flightMap = new Map();
+
+    filteredData.forEach((d) => {
+      const flightId = d.flight_instance.id;
+      if (!flightMap.has(flightId)) {
+        flightMap.set(flightId, {
+          id: flightId,
+          aircraft: d.flight_instance.aircraft?.tail_number || "N/A",
+          callsign: d.flight_instance.callsign,
+          route: d.flight_instance.route?.name || "—",
+          points: [],
+          status: d.flight_instance.flight_status || "UNKNOWN",
+        });
+      }
+      flightMap.get(flightId).points.push({
+        created_at: d.created_at,
+        energy_level: d.energy_level || 0,
+      });
+    });
+
+    const grouped = Array.from(flightMap.values()).map((flight) => {
+      const points = flight.points.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at),
+      );
+
+      if (points.length > 1) {
+        const first = points[0];
+        const last = points[points.length - 1];
+        flight.energyDelta = Math.round(first.energy_level - last.energy_level);
+        const startDate = new Date(first.created_at);
+        const endDate = new Date(last.created_at);
+        const durationMin = Math.round((endDate - startDate) / 60000);
+        flight.duration = `${durationMin}min`;
+        flight.start = first.created_at;
+      }
+
+      return flight;
+    });
+
+    return grouped.sort(
+      (a, b) =>
+        new Date(b.start || b.points[0]?.created_at) -
+        new Date(a.start || a.points[0]?.created_at),
+    );
+  }, [filteredData]);
+
   const hasFilters = selectedAircraft || startDate || endDate;
 
   return (
@@ -152,7 +207,7 @@ export default function HistoricalData() {
             onChange={(e) => setSelectedAircraft(e.target.value)}
             className="filter-select"
           >
-            <option value="">Selecione Aeronave</option>
+            <option value="">Todas Aeronaves</option>
             {aircraftOptions.map((tail) => (
               <option key={tail} value={tail}>
                 {tail}
@@ -189,7 +244,7 @@ export default function HistoricalData() {
             className="apply-btn"
             disabled={loading}
           >
-            {loading ? "Carregando..." : "Aplicar Filtros"}
+            {loading ? "🔄 Carregando..." : "✅ Aplicar Filtros"}
           </button>
         </div>
       </header>
@@ -226,6 +281,59 @@ export default function HistoricalData() {
               <div className="stat-big">{stats.avgEnergy}</div>
               <div>Energia Média</div>
             </div>
+          </div>
+
+          {/* Tabela */}
+          <div className="table-container">
+            <div className="table-header">
+              <h3>Histórico de Voos ({flightsGrouped.length})</h3>
+              {loading && <div className="loading-bar" />}
+            </div>
+
+            {!loading && flightsGrouped.length === 0 ? (
+              <div className="empty-state">
+                Selecione aeronave + filtros para ver voos.
+              </div>
+            ) : (
+              <div className="table-wrapper">
+                <table className="history-table">
+                  <thead>
+                    <tr>
+                      <th>Aeronave</th>
+                      <th>Callsign</th>
+                      <th>Rota</th>
+                      <th>Duração</th>
+                      <th>Energia Δ</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {flightsGrouped.map((flight) => (
+                      <tr key={flight.id} className="flight-row">
+                        <td className="aircraft-cell">
+                          <span>{flight.aircraft}</span>
+                        </td>
+                        <td>{flight.callsign}</td>
+                        <td>{flight.route}</td>
+                        <td>{flight.duration}</td>
+                        <td
+                          className={`energy-cell ${flight.energyDelta > 50 ? "high-consumption" : ""}`}
+                        >
+                          {flight.energyDelta}
+                        </td>
+                        <td>
+                          <span
+                            className={`status-badge ${flight.status.toLowerCase()}`}
+                          >
+                            {flight.status === "TERMINATED" ? "✅" : "🟡"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Gráficos */}
