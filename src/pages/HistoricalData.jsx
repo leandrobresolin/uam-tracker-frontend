@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -10,11 +10,11 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  ScatterChart,
-  Scatter,
-  Cell,
 } from "recharts";
 import { fetchAircraftData } from "../services/api";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale";
 
 export default function HistoricalData() {
   const [allData, setAllData] = useState([]);
@@ -50,13 +50,18 @@ export default function HistoricalData() {
 
       const filters = {};
       if (selectedAircraft) filters.aircraft = selectedAircraft;
-      if (startDate) filters.created_at__gte = startDate + "T00:00:00Z";
-      if (endDate) filters.created_at__lte = endDate + "T23:59:59Z";
+      if (startDate) filters.created_from = startDate + "T00:00:00Z";
+      if (endDate) filters.created_to = endDate + "T23:59:59Z";
 
       const response = await fetchAircraftData(filters);
       setFilteredData(response);
     } catch (err) {
-      setError("Erro ao aplicar filtros");
+      if (err.response?.status === 404) {
+        setFilteredData([]);
+        setError(null);
+      } else {
+        setError("Erro ao aplicar filtros");
+      }
     } finally {
       setLoading(false);
     }
@@ -156,20 +161,26 @@ export default function HistoricalData() {
           </select>
 
           <div className="date-filters">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+            <DatePicker
+              selected={startDate ? new Date(startDate) : null}
+              onChange={(date) =>
+                setStartDate(date ? date.toISOString().split("T")[0] : "")
+              }
+              dateFormat="dd/MM/yyyy"
+              locale={ptBR}
               className="date-input"
-              placeholder="Data Inicial"
+              placeholderText="dd/mm/yyyy"
             />
             <span className="date-separator">até</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+            <DatePicker
+              selected={endDate ? new Date(endDate) : null}
+              onChange={(date) =>
+                setEndDate(date ? date.toISOString().split("T")[0] : "")
+              }
+              dateFormat="dd/MM/yyyy"
+              locale={ptBR}
               className="date-input"
-              placeholder="Data Final"
+              placeholderText="dd/mm/yyyy"
             />
           </div>
 
